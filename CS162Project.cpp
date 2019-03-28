@@ -7,39 +7,49 @@ struct process{
 	int arrival;
 	int burst;
 	int priority;
-	bool ran;
 };
 
 //schedule algorithm for first come, first serve
 string fcfs(process procs[],int numProcess){
-	int arrivalCounter = procs[0].arrival;
-	int indexCounter = procs[0].index;
-	int processCounter = numProcess;
-	int burst;
-	bool state = true;
+	int i, j, k, min, temp;
 	string answer = "";
-	while(state){
-		for(int i = 0; i < numProcess; i++){
-			if(arrivalCounter > procs[i].arrival && procs[i].ran == false){
-				arrivalCounter = procs[i].arrival;
-				indexCounter = procs[i].index;
+	
+	//This one sorts the from least to greatest
+	//The least will be stored in min
+	for(i = 0; i < numProcess - 1; i++){
+		min = i;
+		for(j = i + 1; j < numProcess; j++){
+			if(procs[j].arrival < procs[min].arrival){
+				min = j;
 			}
-			else if(arrivalCounter == procs[i].arrival && procs[i].ran == false){
-				if(indexCounter > procs[i].index){
-					indexCounter = procs[i].index;
+			//This takes into account when there are similar arrival, choose smallest index
+			else if(procs[j].arrival == procs[min].arrival){
+				if(procs[j].index < procs[min].index){
+					min = j;
+				}
+				else{
+					min = min;
 				}
 			}
-			else{
-				arrivalCounter = procs[i].arrival;
-				indexCounter = procs[i].index;
-			}
-			procs[indexCounter].ran = true;
-			burst = procs[indexCounter].burst;
 		}
-		processCounter -= 1;
-		answer = answer + to_string(arrivalCounter) + " " + to_string(indexCounter) + " " + to_string(burst) + "X" + "\n";
-		if(processCounter == 0){
-			state = false;
+		//Sorting Arrival
+		temp = procs[i].arrival;
+		procs[i].arrival = procs[min].arrival;
+		procs[min].arrival = temp;
+		
+		//Sorting Burst
+		temp = procs[i].burst;
+		procs[i].burst = procs[min].burst;
+		procs[min].burst = temp;
+		
+		//Sorting Index
+		temp = procs[i].index;
+		procs[i].index = procs[min].index;
+		procs[min].index = temp;
+		
+		//Printing the answer
+		for(k = 0; k < numProcess; k++){
+			answer = answer + to_string(procs[k].arrival) + " " + to_string(procs[k].index) + " " + to_string(procs[k].burst) + "X" + "\n";
 		}
 	}
 	return answer;
@@ -58,7 +68,6 @@ int main(){
 		if(schedule == "FCFS"){
 			for(int index = 1; index <= numProcess; index++){
 				nig[index - 1].index = index;
-				nig[index - 1].ran = false;
 				cin >> a >> b >> p;
 				nig[index - 1].arrival = a;
 				nig[index - 1].burst = b;
@@ -87,9 +96,6 @@ int main(){
 			}
 		}
 	}
-	
-	/*cout << numTestCase << endl << numProcess << endl << schedule << endl;
-	cout << fcfs[0].index << endl << fcfs[0].arrival << endl << fcfs[0].burst << endl << fcfs[0].priority;*/
 
     return 0;
 }
