@@ -127,7 +127,7 @@ string srtf(process procs[],int numProcess){
 				qTemp.push(procs[i]);
 				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i+1].arrival - procs[i].arrival) + "\n";											
 			}
-			else if(!qTemp.empty() && procs[i].burst > qTemp.first().burst){
+			else if(!qTemp.empty() && procs[i].burst > qTemp.front().burst){
 				if(procs[i].arrival + procs[i].burst > procs[i+1].arrival){
 					//If arrival p1 + burst p1 > arrival p2
 					//Then update burst p1 and push it into qTemp
@@ -137,10 +137,12 @@ string srtf(process procs[],int numProcess){
 				}
 				else{
 					answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
+					allDone++;
 				}
 			}
 			else{
 				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
+				allDone++;
 			}
 		}
 	}
