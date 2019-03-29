@@ -127,18 +127,22 @@ string srtf(process procs[],int numProcess){
 				qTemp.push(procs[i]);
 				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i+1].arrival - procs[i].arrival) + "\n";											
 			}
+			else if(!qTemp.empty() && procs[i].burst > qTemp.first().burst){
+				if(procs[i].arrival + procs[i].burst > procs[i+1].arrival){
+					//If arrival p1 + burst p1 > arrival p2
+					//Then update burst p1 and push it into qTemp
+					procs[i].burst = procs[i].burst - procs[i+1].arrival;
+					qTemp.push(procs[i]);
+					answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i+1].arrival - procs[i].arrival) + "\n";											
+				}
+				else{
+					answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
+				}
+			}
 			else{
 				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
 			}
-
-			//Next part: check qTemp for interrupted processes
-			if(!qTemp.empty()){
-				if(qTemp.first().burst < procs[i+1].burst){
-					
-				}
-			}
 		}
-
 	}
 	
 	//since first proc[0].arrival is the smallest arrival time, initialize it to timeElapsed
