@@ -130,6 +130,8 @@ string rr(process procs[], int numProcess, int quantumTime){
 			if(q.front().burst <= quantumTime){
 				answer = answer + to_string(timeElapsed) + " " + to_string(q.front().index) + " " + to_string(q.front().burst) + "X" + "\n";
 				timeElapsed += q.front().burst;
+				//pops elements from the q after adding burst to the timeElapsed.
+				q.pop();
 			}
 			//if quantumTime exceeded then push the first element of q into a temporary qTemp that will be used later
 			else if(q.front().burst > quantumTime){
@@ -138,9 +140,6 @@ string rr(process procs[], int numProcess, int quantumTime){
 				timeElapsed += quantumTime;
 				qTemp.push(q.front());
 			}
-			
-			//pops elements from the q after adding burst to the timeElapsed.
-			q.pop();
 		}
 		
 		//if the arrival of q is less than or equal to timeElapsed then do that instead of the element inside qTemp
