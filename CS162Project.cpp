@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -70,9 +71,10 @@ string fcfs(process procs[],int numProcess){
 string srtf(process procs[],int numProcess){
 	int min, temp, timeElapsed;
 	int allDone = 0;
+	int vi = 0;
 	string answer = "";
-	queue <process> qOut;
 	queue <process> qTemp;
+	vector <process> v;
 	
 	//This one sorts the from least to greatest
 	//The least will be stored in min
@@ -113,48 +115,81 @@ string srtf(process procs[],int numProcess){
 	
 	//since first proc[0].arrival is the smallest arrival time, initialize it to timeElapsed
 	timeElapsed = procs[0].arrival;
+
+	//everything in procs pushed to vector v
+	for(int i = 0; i < numProcess; i++){
+		v.push_back(procs[i]);
+	}
 	
 	//prints answers
-	while(allDone != numProcess){
+	while(vi != numProcess){
 		/*
-		if arrival p1 + burst p1 > arrival p2
-		out cputime p1 == arrival p2 - arrival p1
+		if timeElapsed + burst p1 > arrival p2
+		out cputime p1 == arrival p2 - timeElapsed
 		*/
-		for(int i = 0; i < numProcess; i++){
-			if(procs[i].arrival + procs[i].burst > procs[i+1].arrival){
-				//If arrival p1 + burst p1 > arrival p2
-				//Then update burst p1 and push it into qTemp
-				procs[i].burst = procs[i].burst - procs[i+1].arrival;
-				qTemp.push(procs[i]);
-				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i+1].arrival - procs[i].arrival) + "\n";
-				timeElapsed += procs[i+1].arrival - procs[i].arrival;
-			}
-			else if(!qTemp.empty() && procs[i].burst > qTemp.front().burst){
-				if(procs[i].arrival + procs[i].burst > procs[i+1].arrival){
-					//If arrival p1 + burst p1 > arrival p2
-					//Then update burst p1 and push it into qTemp
-					procs[i].burst = procs[i].burst - procs[i+1].arrival;
-					qTemp.push(procs[i]);
-					answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i+1].arrival - procs[i].arrival) + "\n";											
+		if(vi == numProcess - 1){
+			if(!qTemp.empty()){
+				if(v.at(vi).burst > qTemp.front().burst){
+					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(qTemp.front().burst) + "X" + "\n";										
+					timeElapsed += qTemp.front().burst;
+					qTemp.pop();
 				}
 				else{
-					answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
-					allDone++;
+					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
+					timeElapsed += v.at(vi).burst;
+					vi++;
 				}
 			}
 			else{
-				answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
-				allDone++;
+				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
+				timeElapsed += v.at(vi).burst;
+				vi++;
 			}
 		}
+		else{
+			if(timeElapsed + v.at(vi).burst > v.at(vi+1).arrival){
+				v.at(vi).burst = v.at(vi).burst - v.at(vi+1).arrival;
+				qTemp.push(v.at(vi));
+				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";
+				timeElapsed += v.at(vi+1).arrival - v.at(vi).arrival;
+			}
+			else if(!qTemp.empty() && v.at(vi).burst > qTemp.front().burst){
+				if(timeElapsed + qTemp.front().burst > v.at(vi+1).arrival){
+					qTemp.front().burst = qTemp.front().burst - v.at(vi+1).arrival;
+					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";											
+					timeElapsed += v.at(vi+1).arrival - qTemp.front().arrival;
+					qTemp.push(v.at(vi));
+				}
+				else{
+					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(qTemp.front().burst) + "X" + "\n";
+					timeElapsed += qTemp.front().burst;
+					qTemp.pop();
+					vi++;
+				}
+			}
+			else if(!qTemp.empty() && v.at(vi).burst < qTemp.front().burst){
+				if(timeElapsed + v.at(vi).burst > v.at(vi+1).arrival){
+					v.at(vi).burst = v.at(vi).burst - v.at(vi+1).arrival;
+					qTemp.push(v.at(vi));
+					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";											
+					timeElapsed += v.at(vi+1).arrival - v.at(vi).arrival;
+				}
+				else{
+					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
+					timeElapsed += v.at(vi).burst;
+					qTemp.pop();
+					vi++;
+				}
+			}
+			else{
+				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
+				timeElapsed += v.at(vi).burst;
+				vi++;
+			}
+		}
+		
 	}
 	
-	//prints answers
-	for(int i = 0; i < numProcess; i++){
-		//print answer first then add the burst to the timeElapsed
-		answer = answer + to_string(timeElapsed) + " " + to_string(procs[i].index) + " " + to_string(procs[i].burst) + "X" + "\n";
-		timeElapsed += procs[i].burst;
-	}
 	return answer;
 }
 
