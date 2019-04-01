@@ -10,7 +10,50 @@ struct process{
 	int arrival;
 	int burst;
 	int priority;
+	bool scheduled = false;
 };
+
+//gets the smallest arrival from the processes and returns its index
+int getSmallestArrival(process procs[],int timeElapsed,int numProcess) {
+    int min;
+    for(int i = 0; i < numProcess; i++){
+        if(procs[i].scheduled == false) {
+            min = i;
+            break;
+        }
+    }
+    for(int i = 0; i < numProcess; i++){
+        if(procs[i].scheduled == false){
+            if(procs[i].arrival <= timeElapsed){
+                min = i;
+                break;
+            }
+            if(procs[i].arrival < procs[min].arrival){
+                min = i;
+            }
+        }
+    }
+    return min;
+}
+
+//gets the next smallest arrival that might
+//...interrupt the current process and returns its index
+int getNextArrival(process procs[],int bound){
+    int min;
+    for(int i = 0; i < bound; i++) {
+        if(procs[i].scheduled == false){
+            min = i;
+            break;
+        }
+    }
+    for(int i = 0; i < bound; i++){
+        if(procs[i].scheduled == false && procs[i].arrival < procs[min].arrival){
+        	//arrival of procs[i] must be smaller than arrival of current process
+            min = i;
+        }
+    }
+    return min;
+}
 
 //schedule algorithm for first come, first serve
 string fcfs(process procs[],int numProcess){
@@ -69,128 +112,60 @@ string fcfs(process procs[],int numProcess){
 }
 
 string srtf(process procs[],int numProcess){
-	int min, temp, timeElapsed;
-	int allDone = 0;
-	int vi = 0;
+	int timeElapsed = 0;
+	bool allDone = false;
+	bool allDoneChecker = false;
+	process procsTemp;
 	string answer = "";
-	queue <process> qTemp;
-	vector <process> v;
-	
-	//This one sorts the from least to greatest
-	//The least will be stored in min
-	for(int i = 0; i < numProcess - 1; i++){
-		min = i;
-		for(int j = i + 1; j < numProcess; j++){
-			//Sorts via arrival then burst then index
-			if(procs[j].arrival < procs[min].arrival){
-				min = j;
-			}
-			else if(procs[j].arrival == procs[min].arrival){
-				if(procs[j].burst < procs[min].burst){
-					min = j;
-				}
-				else if(procs[j].burst == procs[min].burst){
-					if(procs[j].index < procs[min].index){
-						min = j;
-					}
-				}
-			}
-		}
-		
-		//Sorting Arrival
-		temp = procs[i].arrival;
-		procs[i].arrival = procs[min].arrival;
-		procs[min].arrival = temp;
-		
-		//Sorting Burst
-		temp = procs[i].burst;
-		procs[i].burst = procs[min].burst;
-		procs[min].burst = temp;
-		
-		//Sorting Index
-		temp = procs[i].index;
-		procs[i].index = procs[min].index;
-		procs[min].index = temp;
-	}
-	
-	//since first proc[0].arrival is the smallest arrival time, initialize it to timeElapsed
-	timeElapsed = procs[0].arrival;
 
-	//everything in procs pushed to vector v
-	for(int i = 0; i < numProcess; i++){
-		v.push_back(procs[i]);
-	}
-	
-	//prints answers
-	while(vi != numProcess){
-		/*
-		if timeElapsed + burst p1 > arrival p2
-		out cputime p1 == arrival p2 - timeElapsed
-		*/
-		if(vi == numProcess - 1){
-			if(!qTemp.empty()){
-				if(v.at(vi).burst > qTemp.front().burst){
-					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(qTemp.front().burst) + "X" + "\n";										
-					timeElapsed += qTemp.front().burst;
-					qTemp.pop();
-				}
-				else{
-					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
-					timeElapsed += v.at(vi).burst;
-					vi++;
-				}
-			}
-			else{
-				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
-				timeElapsed += v.at(vi).burst;
-				vi++;
+	//sorts the array of processes by shortest burst times
+	for(int i = 0; i < numProcess-1; i++){
+		for(int j = 0; j < numProcess-i-1; j++){
+			if(procs[j].burst > procs[j+1].burst) {
+				procsTemp = procs[j];
+				procs[j] = procs[j+1];
+				procs[j+1] = procsTemp;
 			}
 		}
-		else{
-			if(timeElapsed + v.at(vi).burst > v.at(vi+1).arrival){
-				v.at(vi).burst = v.at(vi).burst - v.at(vi+1).arrival;
-				qTemp.push(v.at(vi));
-				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";
-				timeElapsed += v.at(vi+1).arrival - v.at(vi).arrival;
-			}
-			else if(!qTemp.empty() && v.at(vi).burst > qTemp.front().burst){
-				if(timeElapsed + qTemp.front().burst > v.at(vi+1).arrival){
-					qTemp.front().burst = qTemp.front().burst - v.at(vi+1).arrival;
-					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";											
-					timeElapsed += v.at(vi+1).arrival - qTemp.front().arrival;
-					qTemp.push(v.at(vi));
-				}
-				else{
-					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(qTemp.front().burst) + "X" + "\n";
-					timeElapsed += qTemp.front().burst;
-					qTemp.pop();
-					vi++;
-				}
-			}
-			else if(!qTemp.empty() && v.at(vi).burst < qTemp.front().burst){
-				if(timeElapsed + v.at(vi).burst > v.at(vi+1).arrival){
-					v.at(vi).burst = v.at(vi).burst - v.at(vi+1).arrival;
-					qTemp.push(v.at(vi));
-					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi+1).arrival - timeElapsed) + "\n";											
-					timeElapsed += v.at(vi+1).arrival - v.at(vi).arrival;
-				}
-				else{
-					answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
-					timeElapsed += v.at(vi).burst;
-					qTemp.pop();
-					vi++;
-				}
-			}
-			else{
-				answer = answer + to_string(timeElapsed) + " " + to_string(v.at(vi).index) + " " + to_string(v.at(vi).burst) + "X" + "\n";
-				timeElapsed += v.at(vi).burst;
-				vi++;
+	}
+    
+    //while not all the processes are done, loop
+    while(!allDone){
+    	//first gets the starting index of the process with the smallest arrival
+        int startIndex = getSmallestArrival(procs, timeElapsed, numProcess);
+        //then gets the index of the next process with the smallest arrival
+        //...that might interrupt the current process
+        int nextIndex = getNextArrival(procs, startIndex);
+        //set timeElapsed to the current running time
+        if(timeElapsed < procs[startIndex].arrival){
+            timeElapsed = procs[startIndex].arrival + 1;
+        }
+        //this will run if a process is interrupted
+        if(startIndex != nextIndex && procs[startIndex].burst+timeElapsed - 1 > procs[nextIndex].arrival){
+            answer += to_string(timeElapsed) + " " + to_string(procs[startIndex].index) + " " + to_string(procs[nextIndex].arrival - procs[startIndex].arrival)  + "\n";
+            
+			timeElapsed = procs[nextIndex].arrival;
+            procs[startIndex].burst -= (timeElapsed-procs[startIndex].arrival);
+            procs[startIndex].arrival = procs[nextIndex].arrival + procs[nextIndex].burst;
+        }
+        //this will run if a process will complete
+        else{
+            answer += to_string(timeElapsed) + " " + to_string(procs[startIndex].index) + " " + to_string(procs[startIndex].burst) + "X" + "\n";
+            timeElapsed += procs[startIndex].burst;
+            procs[startIndex].scheduled = true;
+        }
+
+        //checks if all processes have been scheduled which means they are all done
+        allDoneChecker = true;
+		for(int i = 0; i < numProcess; i++){
+			if(procs[i].scheduled == false){
+				allDoneChecker = false;
+				break;
 			}
 		}
-		
-	}
-	
-	return answer;
+		allDone = allDoneChecker;
+    }
+    return answer;
 }
 
 int main(){
