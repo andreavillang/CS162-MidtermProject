@@ -111,6 +111,51 @@ string fcfs(process procs[],int numProcess){
 	return answer;
 }
 
+string priorityNP(process procs[],int numProcess){
+	int i, j, k, min, timeElapsed = 0, done = 0;
+	process temp;
+	string answer = "";
+	
+	//This one sorts the from smallest to biggest priority time
+	for(i = 0; i < numProcess - 1; i++){
+		min = i;
+		for(j = i + 1; j < numProcess; j++){
+			if(procs[j].priority < procs[min].priority){
+				min = j;
+			}
+			//This takes into account when there are similar priority, choose smallest index
+			else if(procs[j].priority == procs[min].priority){
+				if(procs[j].index < procs[min].index){
+					min = j;
+				}
+			}
+		}
+		temp = procs[i];
+		procs[i] = procs[min];
+		procs[min] = temp;
+	}
+	
+	//Actual Algorithm
+	while(done != numProcess){
+		for(int k = 0; k < numProcess; k++){
+			//Check if arrival time is less than or equal to timeElapsed while also checking if already scheduled
+			if(procs[k].arrival <= timeElapsed && procs[k].scheduled == false){
+				answer = answer + to_string(timeElapsed) + " " + to_string(procs[k].index) + " " + to_string(procs[k].burst) + "X" + "\n";
+				timeElapsed += procs[k].burst;
+				procs[k].scheduled = true;
+				done++;
+				timeElapsed--;
+				break;
+			}
+		}
+		//After every iteration increment timeElapsed
+		timeElapsed++;
+	}
+	
+	//Print Answer
+	return answer;
+}
+
 string priorityP(process procs[],int numProcess){
 	int timeElapsed = 0;
 	bool allDone = false;
@@ -118,7 +163,7 @@ string priorityP(process procs[],int numProcess){
 	process procsTemp;
 	string answer = "";
 
-	//sorts the array of processes by shortest burst times
+	//sorts the array of processes by shortest priority times
 	for(int i = 0; i < numProcess-1; i++){
 		for(int j = 0; j < numProcess-i-1; j++){
 			if(procs[j].priority > procs[j+1].priority) {
@@ -210,6 +255,13 @@ int main(){
 				cin >> proc[index - 1].arrival >> proc[index - 1].burst >> proc[index - 1].priority;
 			}
 			cout << i << endl << priorityP(proc,numProcess) << endl;
+		}
+		else if(schedule == "PNP"){
+			for(int index = 1; index <= numProcess; index++){
+				proc[index - 1].index = index;
+				cin >> proc[index - 1].arrival >> proc[index - 1].burst >> proc[index - 1].priority;
+			}
+			cout << i << endl << priorityNP(proc,numProcess) << endl;
 		}
 		else if(schedule == "RR"){
 			for(int index = 1; index <= numProcess; index++){
