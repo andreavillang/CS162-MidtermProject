@@ -185,9 +185,9 @@ string rr(process procs[], int numProcess, int quantumTime){
 		//If the temporary queue is empty, no interrupt, then keep doing the original queue
 		if(qTemp.empty()){
 			//Traverses the regular queue
-			if(q.front().arrival <= timeElapsed){
+			if(q.front().arrival <= timeElapsed && !q.empty()){
 				//If less than quantumTime then finish it, update timeElapsed, then pop
-				if(q.front().burst < quantumTime){
+				if(q.front().burst <= quantumTime){
 					answer = answer + to_string(timeElapsed) + " " + to_string(q.front().index) + " " + to_string(q.front().burst) + "X" + "\n";
 					timeElapsed += q.front().burst;
 					q.pop();
@@ -210,9 +210,9 @@ string rr(process procs[], int numProcess, int quantumTime){
 		//If temporary queue is not empty, there's an interrupt, then check both the original and temporary queue to see which one goes first
 		else if(!qTemp.empty()){
 			//Checks to see if original queue will run
-			if(q.front().arrival <= timeElapsed){
+			if(q.front().arrival <= timeElapsed && !q.empty()){
 				//Same one as above
-				if(q.front().burst < quantumTime){
+				if(q.front().burst <= quantumTime){
 					answer = answer + to_string(timeElapsed) + " " + to_string(q.front().index) + " " + to_string(q.front().burst) + "X" + "\n";
 					timeElapsed += q.front().burst;
 					q.pop();
@@ -230,7 +230,7 @@ string rr(process procs[], int numProcess, int quantumTime){
 			//Else continue the interrupted process
 			else{
 				//Same one as above only this time with the qTemp
-				if(qTemp.front().burst < quantumTime){
+				if(qTemp.front().burst <= quantumTime){
 					answer = answer + to_string(timeElapsed) + " " + to_string(qTemp.front().index) + " " + to_string(qTemp.front().burst) + "X" + "\n";
 					timeElapsed += qTemp.front().burst;
 					qTemp.pop();
