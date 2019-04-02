@@ -13,20 +13,23 @@ struct process{
 };
 
 //gets the smallest arrival from the processes and returns its index
-int getSmallestArrival(process procs[],int timeElapsed,int numProcess) {
+int getSmallestArrival(process procs[],int timeElapsed,int numProcess){
     int min;
+    //checks if a process has not been scheduled to start with that as the min
     for(int i = 0; i < numProcess; i++){
-        if(procs[i].scheduled == false) {
+        if(procs[i].scheduled == false){
             min = i;
             break;
         }
     }
     for(int i = 0; i < numProcess; i++){
         if(procs[i].scheduled == false){
+        	//this one gets the min immediately if it has an arrival less than or equal to the timeElapsed
             if(procs[i].arrival <= timeElapsed){
                 min = i;
                 break;
             }
+            //this one compares arrival times to the current min
             if(procs[i].arrival < procs[min].arrival){
                 min = i;
             }
@@ -38,8 +41,10 @@ int getSmallestArrival(process procs[],int timeElapsed,int numProcess) {
 //gets the next smallest arrival that might
 //...interrupt the current process and returns its index
 int getNextArrival(process procs[],int bound){
+	//bound is everything before the current running process
     int min;
-    for(int i = 0; i < bound; i++) {
+    //checks if a process has not been scheduled to start with that as the min
+    for(int i = 0; i < bound; i++){
         if(procs[i].scheduled == false){
             min = i;
             break;
@@ -61,7 +66,7 @@ string fcfs(process procs[],int numProcess){
 	process temp;
 	string answer = "";
 	
-	//This one sorts the from smalles to biggest arrival time
+	//This one sorts the from smallest to biggest arrival time
 	for(i = 0; i < numProcess - 1; i++){
 		min = i;
 		for(j = i + 1; j < numProcess; j++){
@@ -252,6 +257,7 @@ string rr(process procs[], int numProcess, int quantumTime){
 	return answer;
 }
 
+//schedule algorithm for priority preemptive
 string priorityP(process procs[],int numProcess){
 	int timeElapsed = 0;
 	bool allDone = false;
@@ -316,6 +322,7 @@ string priorityP(process procs[],int numProcess){
     return answer;
 }
 
+//schedule algorithm for priority non-preemptive
 string priorityNP(process procs[],int numProcess){
 	int i, j, k, min, timeElapsed = 0, done = 0;
 	process temp;
@@ -361,6 +368,7 @@ string priorityNP(process procs[],int numProcess){
 	return answer;
 }
 
+//schedule algorithm for shortest job first preemptive
 string srtf(process procs[],int numProcess){
 	int timeElapsed = 0;
 	bool allDone = false;
