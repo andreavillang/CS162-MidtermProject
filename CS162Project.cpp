@@ -361,6 +361,63 @@ string priorityNP(process procs[],int numProcess){
 	return answer;
 }
 
+string srtf(process procs[],int numProcess){
+	int timeElapsed = 0;
+	bool allDone = false;
+	bool allDoneChecker = false;
+	process procsTemp;
+	string answer = "";
+
+	//sorts the array of processes by shortest burst times
+	for(int i = 0; i < numProcess-1; i++){
+		for(int j = 0; j < numProcess-i-1; j++){
+			if(procs[j].burst > procs[j+1].burst) {
+				procsTemp = procs[j];
+				procs[j] = procs[j+1];
+				procs[j+1] = procsTemp;
+			}
+		}
+	}
+    
+    //while not all the processes are done, loop
+    while(!allDone){
+    	//first gets the starting index of the process with the smallest arrival
+        int startIndex = getSmallestArrival(procs, timeElapsed, numProcess);
+        //then gets the index of the next process with the smallest arrival
+        //...that might interrupt the current process
+        int nextIndex = getNextArrival(procs, startIndex);
+        //set timeElapsed to the current running time
+        if(timeElapsed < procs[startIndex].arrival){
+            timeElapsed = procs[startIndex].arrival + 1;
+        }
+        //this will run if a process is interrupted
+        if(startIndex != nextIndex && procs[startIndex].burst+timeElapsed - 1 > procs[nextIndex].arrival){
+            answer += to_string(timeElapsed) + " " + to_string(procs[startIndex].index) + " " + to_string(procs[nextIndex].arrival - procs[startIndex].arrival)  + "\n";
+            
+			timeElapsed = procs[nextIndex].arrival;
+            procs[startIndex].burst -= (timeElapsed-procs[startIndex].arrival);
+            procs[startIndex].arrival = procs[nextIndex].arrival + procs[nextIndex].burst;
+        }
+        //this will run if a process will complete
+        else{
+            answer += to_string(timeElapsed) + " " + to_string(procs[startIndex].index) + " " + to_string(procs[startIndex].burst) + "X" + "\n";
+            timeElapsed += procs[startIndex].burst;
+            procs[startIndex].scheduled = true;
+        }
+
+        //checks if all processes have been scheduled which means they are all done
+        allDoneChecker = true;
+		for(int i = 0; i < numProcess; i++){
+			if(procs[i].scheduled == false){
+				allDoneChecker = false;
+				break;
+			}
+		}
+		allDone = allDoneChecker;
+    }
+    return answer;
+}
+
 int main(){
     int numTestCase, numProcess;
 	int quantumTime;
@@ -390,8 +447,10 @@ int main(){
 		}
 		else if(schedule == "SRTF"){
 			for(int index = 1; index <= numProcess; index++){
-				//put SRTF algorithm codes here.
+				proc[index - 1].index = index;
+				cin >> proc[index - 1].arrival >> proc[index - 1].burst >> proc[index - 1].priority;
 			}
+			cout << i << endl << srtf(proc,numProcess) << endl;
 		}
 		else if(schedule == "P"){
 			for(int index = 1; index <= numProcess; index++){
