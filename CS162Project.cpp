@@ -59,10 +59,9 @@ int getNextArrival(process procs[],int bound){
     return min;
 }
 
-
 //schedule algorithm for first come, first serve
 string fcfs(process procs[],int numProcess){
-	int i, j, k, min, timeElapsed;
+	int i, j, k, min, timeElapsed, totalProcs = 0, wait, turn, respo, avgRespo = 0, avgTurn = 0, avgWait = 0;
 	process temp;
 	string answer = "";
 	
@@ -92,13 +91,25 @@ string fcfs(process procs[],int numProcess){
 	for(k = 0; k < numProcess; k++){
 		//Print answer first then add the burst to the timeElapsed
 		answer = answer + to_string(timeElapsed) + " " + to_string(procs[k].index) + " " + to_string(procs[k].burst) + "X" + "\n";
+		wait = timeElapsed + procs[k].arrival;
+		turn = timeElapsed + procs[k].burst;
+		respo = wait;
+		cout << wait << endl;
 		timeElapsed += procs[k].burst;
+		totalProcs++;
 		
 		//Makes the timeElapsed dynamically changing
 		if(timeElapsed < procs[k+1].arrival){
 			timeElapsed = procs[k+1].arrival;
 		}
 	}
+	
+	avgWait += wait;
+	avgTurn += turn;
+	avgRespo += respo;
+	
+	//answer += "wait: " + to_string(wait) + "\n" + "turn: " + to_string(turn) + "\n" + "respo: " + to_string(respo);
+	answer = answer + "CPU Utilization: 100%" + "\n" + "Throughput: " + to_string(totalProcs) + "\n" + "Waiting Time: " + to_string(avgWait/numProcess) + "\n" + "Turnaround Time: " + to_string(avgTurn/numProcess) + "\n" + "Response Time: " + to_string(avgRespo/numProcess) + "\n";
 	
 	//Print Answer
 	return answer;
